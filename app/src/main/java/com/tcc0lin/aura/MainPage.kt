@@ -12,33 +12,11 @@ import androidx.compose.ui.Modifier
 import com.tcc0lin.aura.MyApplication.Companion.appContext
 import com.tcc0lin.aura.component.CheckCard
 import com.tcc0lin.aura.component.IconHintCard
+import com.tcc0lin.aura.detectors.FridaDetector
 import kotlinx.coroutines.*
 
-val basicAppList = listOf(
-    "com.topjohnwu.magisk",
-    "io.github.vvb2060.magisk",
-    "de.robv.android.xposed.installer",
-    "org.meowcat.edxposed.manager",
-    "org.lsposed.manager",
-    "top.canyie.dreamland.manager",
-    "me.weishu.exp",
-    "com.android.vendinf",
-    "moe.shizuku.redirectstorage"
-)
-
 val snapShotList = mutableStateListOf<Triple<IDetector, IDetector.Result?, Detail?>>(
-    Triple(AbnormalEnvironment(appContext), null, null),
-//
-//    Triple(PMCommand(appContext), null, null),
-//    Triple(PMConventionalAPIs(appContext), null, null),
-//    Triple(PMSundryAPIs(appContext), null, null),
-//    Triple(PMQueryIntentActivities(appContext), null, null),
-//
-//    Triple(FileDetection(appContext, false), null, null),
-//    Triple(FileDetection(appContext, true), null, null),
-//
-//    Triple(XposedModules(appContext), null, null),
-//    Triple(MagiskApp(appContext), null, null)
+    Triple(FridaDetector(appContext), null, null),
 )
 
 suspend fun runDetector(id: Int, packages: Collection<String>?) {
@@ -53,9 +31,6 @@ suspend fun runDetector(id: Int, packages: Collection<String>?) {
 fun MainPage(modifier: Modifier) {
     LaunchedEffect(appContext) {
         runDetector(0, null)
-//        for (i in 1..6) runDetector(i, basicAppList)
-//        runDetector(7, null)
-//        runDetector(8, null)
     }
 
     Column(
