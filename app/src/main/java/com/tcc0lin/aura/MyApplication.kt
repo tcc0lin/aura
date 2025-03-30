@@ -12,7 +12,7 @@ class MyApplication : Application() {
     }
 
     init {
-//        System.loadLibrary("applist_detector")
+        System.loadLibrary("resplendent")
     }
 
     override fun onCreate() {
