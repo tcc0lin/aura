@@ -1,11 +1,8 @@
-//
-// Created by linhanqiu on 2025/3/30.
-//
-
 #ifndef AURA_CUSTOM_SYSCALL_H
 #define AURA_CUSTOM_SYSCALL_H
 
 #include "syscall_arch.h"
+#include "sys/syscall.h"
 
 /*
  * System calls such as file operations, sleep are converted to syscalls to avoid easy bypass

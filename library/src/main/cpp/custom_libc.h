@@ -1,7 +1,3 @@
-//
-// Created by linhanqiu on 2025/3/30.
-//
-
 #ifndef AURA_CUSTOM_LIBC_H
 #define AURA_CUSTOM_LIBC_H
 
@@ -15,8 +11,7 @@
 
 __attribute__((always_inline))
 static inline size_t
-my_strlcpy(char *dst, const char *src, size_t siz)
-{
+my_strlcpy(char *dst, const char *src, size_t siz) {
     char *d = dst;
     const char *s = src;
     size_t n = siz;
@@ -30,31 +25,28 @@ my_strlcpy(char *dst, const char *src, size_t siz)
     /* Not enough room in dst, add NUL and traverse rest of src */
     if (n == 0) {
         if (siz != 0)
-            *d = '\0';		/* NUL-terminate dst */
-        while (*s++)
-            ;
+            *d = '\0';        /* NUL-terminate dst */
+        while (*s++);
     }
-    return(s - src - 1);	/* count does not include NUL */
+    return (s - src - 1);    /* count does not include NUL */
 }
 
 __attribute__((always_inline))
 static inline
-size_t my_strlen(const char *s)
-{
+size_t my_strlen(const char *s) {
     size_t len = 0;
-    while(*s++) len++;
+    while (*s++) len++;
     return len;
 }
 
 __attribute__((always_inline))
 static inline int
-my_strncmp(const char *s1, const char *s2, size_t n)
-{
+my_strncmp(const char *s1, const char *s2, size_t n) {
     if (n == 0)
         return (0);
     do {
         if (*s1 != *s2++)
-            return (*(unsigned char *)s1 - *(unsigned char *)--s2);
+            return (*(unsigned char *) s1 - *(unsigned char *) --s2);
         if (*s1++ == 0)
             break;
     } while (--n != 0);
@@ -63,8 +55,7 @@ my_strncmp(const char *s1, const char *s2, size_t n)
 
 __attribute__((always_inline))
 static inline char *
-my_strstr(const char *s, const char *find)
-{
+my_strstr(const char *s, const char *find) {
     char c, sc;
     size_t len;
 
@@ -78,46 +69,49 @@ my_strstr(const char *s, const char *find)
         } while (my_strncmp(s, find, len) != 0);
         s--;
     }
-    return ((char *)s);
+    return ((char *) s);
 }
 
 __attribute__((always_inline))
 static inline
-void*  my_memset(void*  dst, int c, size_t n)
-{
-    char*  q   = (char*)dst;
-    char*  end = q + n;
+void *my_memset(void *dst, int c, size_t n) {
+    char *q = (char *) dst;
+    char *end = q + n;
     for (;;) {
-        if (q >= end) break; *q++ = (char) c;
-        if (q >= end) break; *q++ = (char) c;
-        if (q >= end) break; *q++ = (char) c;
-        if (q >= end) break; *q++ = (char) c;
+        if (q >= end) break;
+        *q++ = (char) c;
+        if (q >= end) break;
+        *q++ = (char) c;
+        if (q >= end) break;
+        *q++ = (char) c;
+        if (q >= end) break;
+        *q++ = (char) c;
     }
     return dst;
 }
 
 __attribute__((always_inline))
 static inline int
-my_strcmp(const char *s1, const char *s2)
-{
+my_strcmp(const char *s1, const char *s2) {
     while (*s1 == *s2++)
         if (*s1++ == 0)
             return (0);
-    return (*(unsigned char *)s1 - *(unsigned char *)--s2);
+    return (*(unsigned char *) s1 - *(unsigned char *) --s2);
 }
 
 __attribute__((always_inline))
-static inline int my_atoi(const char *s)
-{
-    int n=0, neg=0;
+static inline int my_atoi(const char *s) {
+    int n = 0, neg = 0;
     while (isspace(*s)) s++;
     switch (*s) {
-        case '-': neg=1;
-        case '+': s++;
+        case '-':
+            neg = 1;
+        case '+':
+            s++;
     }
     /* Compute n as a negative number to avoid overflow on INT_MIN */
     while (isdigit(*s))
-        n = 10*n - (*s++ - '0');
+        n = 10 * n - (*s++ - '0');
     return neg ? n : -n;
 }
 
