@@ -4,43 +4,6 @@
 #include "../custom_libc.h"
 #include "../utils/file_utils.h"
 
-bool result1 = false;
-bool result2 = false;
-bool result3 = false;
-bool result4 = false;
-bool result5 = false;
-bool result6 = false;
-
-__attribute__((always_inline))
-bool frida_detect_by_namedpipe_result() {
-    return result1;
-}
-
-__attribute__((always_inline))
-bool frida_detect_by_threads_result() {
-    return result2;
-}
-
-__attribute__((always_inline))
-bool frida_detect_by_memdiskcompare_result() {
-    return result3;
-}
-
-__attribute__((always_inline))
-bool frida_detect_by_socket_result() {
-    return result4;
-}
-
-__attribute__((always_inline))
-bool frida_detect_by_agent_result() {
-    return result5;
-}
-
-__attribute__((always_inline))
-bool frida_detect_by_memoryscan_result() {
-    return result6;
-}
-
 __attribute__((always_inline))
 void frida_detect_by_namedpipe() {
     LOGI("--------------------frida_detect_by_namedpipe start--------------------");
@@ -59,7 +22,7 @@ void frida_detect_by_namedpipe() {
                 my_readlinkat(AT_FDCWD, filePath, buf, MAX_LENGTH);
                 // LOGI("readlink filePath: %s", filePath);
                 if (NULL != my_strstr(buf, FRIDA_NAMEDPIPE_LINJECTOR)) {
-                    result1 = true;
+                    detect_result.insert({"frida_detect_by_namedpipe", true});
                     LOGI("Frida specific named pipe found. Act now!!!");
                 }
             }
@@ -95,7 +58,7 @@ void frida_detect_by_threads() {
                     //Kill the thread. This freezes the app. Check if it is an anticpated behaviour
                     //int tid = my_atoi(entry->d_name);
                     //int ret = my_tgkill(getpid(), tid, SIGSTOP);
-                    result2 = true;
+                    detect_result.insert({"frida_detect_by_threads", true});
                     LOGI("Frida specific thread found. Act now!!!");
                 }
                 my_close(fd);
@@ -267,7 +230,7 @@ void frida_detect_by_memdiskcompare() {
                 if (my_strstr(map, libstocheck[i]) != NULL) {
                     LOGI("detect line: %s", map);
                     if (true == scan_executable_segments(map, elfSectionArr[i], libstocheck[i])) {
-                        result3 = true;
+                        detect_result.insert({"frida_detect_by_memdiskcompare", true});
                         break;
                     }
                 }
@@ -292,6 +255,7 @@ void prepare_collect_checksum() {
     }
 }
 
+__attribute__((always_inline))
 void frida_detect_by_socket() {
     LOGI("--------------------frida_detect_by_socket start--------------------");
     struct sockaddr_in sa;
@@ -324,6 +288,7 @@ void frida_detect_by_socket() {
     LOGI("--------------------frida_detect_by_socket end--------------------");
 }
 
+__attribute__((always_inline))
 void frida_detect_by_agent() {
     int fd = 0;
     char map[MAX_LINE];
@@ -331,7 +296,7 @@ void frida_detect_by_agent() {
         while ((read_one_line(fd, map, MAX_LINE)) > 0) {
             if (my_strstr(map, "frida-agent") != NULL) {
                 LOGI("detect line: %s", map);
-                result5 = true;
+                detect_result.insert({"frida_detect_by_agent", true});
             }
         }
     } else {
@@ -360,7 +325,7 @@ bool find_mem_string(unsigned long start, unsigned long end, char *bytes, unsign
     return false;
 }
 
-
+__attribute__((always_inline))
 void frida_detect_by_memoryscan() {
     static char keyword[] = "frida";
     char permission[512];
@@ -377,7 +342,7 @@ void frida_detect_by_memoryscan() {
                 LOGI("line: %s", map);
                 if (find_mem_string(start, end, (char *) keyword, 5)) {
                     LOGI("check");
-                    result6 = true;
+                    detect_result.insert({"frida_detect_by_memoryscan", true});
                     break;
                 }
             }
@@ -385,3 +350,12 @@ void frida_detect_by_memoryscan() {
         my_close(fd);
     }
 }
+
+__attribute__((always_inline))
+bool get_detect_result(char *key) {
+    auto it = detect_result.find(key);
+    if (it != detect_result.end()) {
+        return it->second;
+    }
+    return false;
+};

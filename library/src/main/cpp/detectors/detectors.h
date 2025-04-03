@@ -10,6 +10,7 @@
 #include <linux/fcntl.h>
 #include <arpa/inet.h>
 #include <malloc.h>
+#include <map>
 
 #ifndef AURA_DETECTORS_H
 #define AURA_DETECTORS_H
@@ -56,20 +57,12 @@ typedef struct stExecSection {
 //when the size of the libraries are > few MBs
 static execSection *elfSectionArr[NUM_LIBS] = {NULL};
 
+static std::map<char *, bool> detect_result;
+
 void prepare_collect_checksum();
 
 // result
-bool frida_detect_by_namedpipe_result();
-
-bool frida_detect_by_threads_result();
-
-bool frida_detect_by_memdiskcompare_result();
-
-bool frida_detect_by_socket_result();
-
-bool frida_detect_by_agent_result();
-
-bool frida_detect_by_memoryscan_result();
+bool get_detect_result(char *key);
 
 // real logic
 void frida_detect_by_namedpipe();
@@ -83,3 +76,6 @@ void frida_detect_by_socket();
 void frida_detect_by_agent();
 
 void frida_detect_by_memoryscan();
+
+// TODO
+// add libart.so detect: https://bbs.kanxue.com/thread-268586-1.htm

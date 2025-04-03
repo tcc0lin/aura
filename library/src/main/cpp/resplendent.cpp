@@ -12,21 +12,21 @@
 #include "utils/logging.h"
 #include "utils/file_utils.h"
 
-
 static inline void *detect_frida_loop(void *pargs) {
     struct timespec timereq;
     timereq.tv_sec = 5;
     timereq.tv_nsec = 0;
     while (1) {
         LOGI("detect_frida_loop");
-        frida_detect_by_threads();
-        frida_detect_by_namedpipe();
-        frida_detect_by_memdiskcompare();
-        frida_detect_by_socket();
-        frida_detect_by_agent();
-        frida_detect_by_memoryscan();
+        // frida_detect_by_threads();
+        // frida_detect_by_namedpipe();
+        // frida_detect_by_memdiskcompare();
+        // frida_detect_by_socket();
+        // frida_detect_by_agent();
+        // frida_detect_by_memoryscan();
         my_nanosleep(&timereq, NULL);
         // test
+        frida_detect_by_tmpserver();
     }
 }
 
@@ -39,37 +39,26 @@ void init_for_frida_detect() {
     pthread_create(&t, NULL, detect_frida_loop, NULL);
 }
 
-jboolean frida_detect_by_namedpipe_wrapper(JNIEnv *env, jobject instance) {
-    return frida_detect_by_namedpipe_result();
-}
+#define GENERATE_JNI_FUNC(NAME) \
+    extern "C" JNIEXPORT jboolean JNICALL \
+    JNI_##NAME(JNIEnv* env, jobject instance) { \
+        return static_cast<jboolean>(get_detect_result(#NAME)); \
+    }
 
-jboolean frida_detect_by_threads_wrapper(JNIEnv *env, jobject instance) {
-    return frida_detect_by_threads_result();
-}
-
-jboolean frida_detect_by_memdiskcompare_wrapper(JNIEnv *env, jobject instance) {
-    return frida_detect_by_memdiskcompare_result();
-}
-
-jboolean frida_detect_by_socket_wrapper(JNIEnv *env, jobject instance) {
-    return frida_detect_by_socket_result();
-}
-
-jboolean frida_detect_by_agent_wrapper(JNIEnv *env, jobject instance) {
-    return frida_detect_by_agent_result();
-}
-
-jboolean frida_detect_by_memoryscan_wrapper(JNIEnv *env, jobject instance) {
-    return frida_detect_by_memoryscan_result();
-}
+GENERATE_JNI_FUNC(frida_detect_by_namedpipe)
+GENERATE_JNI_FUNC(frida_detect_by_threads)
+GENERATE_JNI_FUNC(frida_detect_by_memdiskcompare)
+GENERATE_JNI_FUNC(frida_detect_by_socket)
+GENERATE_JNI_FUNC(frida_detect_by_agent)
+GENERATE_JNI_FUNC(frida_detect_by_memoryscan)
 
 static JNINativeMethod gMethods[] = {
-        {"fridaDetectByNamedpipe",      "()Z", (void *) frida_detect_by_namedpipe_wrapper},
-        {"fridaDetectByThreads",        "()Z", (void *) frida_detect_by_threads_wrapper},
-        {"fridaDetectByMemdiskcompare", "()Z", (void *) frida_detect_by_memdiskcompare_wrapper},
-        {"fridaDetectBySocket",         "()Z", (void *) frida_detect_by_socket_wrapper},
-        {"fridaDetectByAgent",          "()Z", (void *) frida_detect_by_agent_wrapper},
-        {"fridaDetectByMemoryscan",     "()Z", (void *) frida_detect_by_memoryscan_wrapper},
+        {"fridaDetectByNamedpipe",      "()Z", (void *) JNI_frida_detect_by_namedpipe},
+        {"fridaDetectByThreads",        "()Z", (void *) JNI_frida_detect_by_threads},
+        {"fridaDetectByMemdiskcompare", "()Z", (void *) JNI_frida_detect_by_memdiskcompare},
+        {"fridaDetectBySocket",         "()Z", (void *) JNI_frida_detect_by_socket},
+        {"fridaDetectByAgent",          "()Z", (void *) JNI_frida_detect_by_agent},
+        {"fridaDetectByMemoryscan",     "()Z", (void *) JNI_frida_detect_by_memoryscan},
 };
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
