@@ -6,6 +6,7 @@
 #include <linux/stat.h>
 #include <sys/stat.h>
 #include <linux/elf.h>
+#include <dlfcn.h>
 #include "detectors/detectors.h"
 #include "custom_syscall.h"
 #include "custom_libc.h"
@@ -18,17 +19,18 @@ static inline void *detect_frida_loop(void *pargs) {
     timereq.tv_nsec = 0;
     while (1) {
         LOGI("detect_frida_loop");
-        // frida_detect_by_threads();
-        // frida_detect_by_namedpipe();
-        // frida_detect_by_memdiskcompare();
-        // frida_detect_by_socket();
-        // frida_detect_by_agent();
-        // frida_detect_by_memoryscan();
+        frida_detect_by_threads();
+        frida_detect_by_namedpipe();
+        frida_detect_by_memdiskcompare();
+        frida_detect_by_socket();
+        frida_detect_by_agent();
+        frida_detect_by_memoryscan();
         my_nanosleep(&timereq, NULL);
         // test
-        frida_detect_by_tmpserver();
     }
 }
+
+typedef int (*pthread_create_t)(pthread_t *, const pthread_attr_t *, void *(*)(void *), void *);
 
 
 //Upon loading the library, this function annotated as constructor starts executing
@@ -36,7 +38,12 @@ __attribute__((constructor))
 void init_for_frida_detect() {
     prepare_collect_checksum();
     pthread_t t;
-    pthread_create(&t, NULL, detect_frida_loop, NULL);
+    pthread_create_t p_pthread_create = (pthread_create_t) dlsym(RTLD_DEFAULT, "pthread_create");
+    if (!p_pthread_create) {
+        fprintf(stderr, "dlsym 失败: %s\n", dlerror());
+    } else {
+        p_pthread_create(&t, NULL, detect_frida_loop, NULL);
+    }
 }
 
 #define GENERATE_JNI_FUNC(NAME) \

@@ -13,6 +13,9 @@ project("resplendent")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+add_compile_options(-fvisibility=hidden -fvisibility-inlines-hidden)
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
@@ -37,6 +40,10 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         ${SOURCE_DIR_UTILS}
 )
 
+#符号隐藏
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
+        "LINKER:--version-script=${CMAKE_SOURCE_DIR}/version.ld"
+)
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE arch/${ANDROID_ABI})
 
 # Specifies libraries CMake should link to your target library. You

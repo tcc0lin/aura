@@ -14,14 +14,18 @@ void frida_detect_by_namedpipe() {
             struct stat filestat;
             char buf[MAX_LENGTH] = "";
             char filePath[MAX_LENGTH] = "";
-            snprintf(filePath, sizeof(filePath), "/proc/self/fd/%s", entry->d_name);
+            snprintf(filePath, sizeof(filePath), PROC_FD_FORMAT, entry->d_name);
             // LOGI("filePath: %s", filePath);
             lstat(filePath, &filestat);
             if ((filestat.st_mode & S_IFMT) == S_IFLNK) {
                 //TODO: Another way is to check if filepath belongs to a path not related to system or the app
                 my_readlinkat(AT_FDCWD, filePath, buf, MAX_LENGTH);
-                // LOGI("readlink filePath: %s", filePath);
+                // LOGI("readlink filePath: %s realPath: %s", filePath, buf);
                 if (NULL != my_strstr(buf, FRIDA_NAMEDPIPE_LINJECTOR)) {
+                    detect_result.insert({"frida_detect_by_namedpipe", true});
+                    LOGI("Frida specific named pipe found. Act now!!!");
+                }
+                if (NULL != my_strstr(buf, TMP_DIR)) {
                     detect_result.insert({"frida_detect_by_namedpipe", true});
                     LOGI("Frida specific named pipe found. Act now!!!");
                 }
@@ -45,7 +49,7 @@ void frida_detect_by_threads() {
             }
             snprintf(filePath, sizeof(filePath), PROC_STATUS, entry->d_name);
             // LOGI("filePath: %s", filePath);
-            int fd = my_openat(AT_FDCWD, filePath, O_RDONLY | O_CLOEXEC, 0);
+            int fd = security_openat(AT_FDCWD, filePath, O_RDONLY | O_CLOEXEC, 0);
             if (fd != 0) {
                 char buf[MAX_LENGTH] = "";
                 read_one_line(fd, buf, MAX_LENGTH);
@@ -74,7 +78,7 @@ void parse_proc_maps_to_fetch_path(char **filepaths) {
     int fd = 0;
     char map[MAX_LINE];
     int counter = 0;
-    if ((fd = my_openat(AT_FDCWD, PROC_MAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
+    if ((fd = security_openat(AT_FDCWD, PROC_MAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
         while ((read_one_line(fd, map, MAX_LINE)) > 0) {
             for (int i = 0; i < NUM_LIBS; i++) {
                 if (my_strstr(map, libstocheck[i]) != NULL) {
@@ -116,7 +120,7 @@ bool fetch_checksum_of_library(const char *filePath, execSection **pTextSection)
     Elf_Shdr sectHdr;
     int fd;
     int execSectionCount = 0;
-    fd = my_openat(AT_FDCWD, filePath, O_RDONLY | O_CLOEXEC, 0);
+    fd = security_openat(AT_FDCWD, filePath, O_RDONLY | O_CLOEXEC, 0);
     if (fd < 0) {
         return NULL;
     }
@@ -188,7 +192,7 @@ bool scan_executable_segments(char *map, execSection *pElfSectArr, const char *l
             for (int i = 0; i < pElfSectArr->execSectionCount; i++) {
                 unsigned long output = checksum(buffer + pElfSectArr->offset[i],
                                                 pElfSectArr->memsize[i]);
-                LOGI("i: %d,mem: %ld,disk: %ld", i, output, pElfSectArr->checksum[i]);
+                // LOGI("i: %d,mem: %ld,disk: %ld", i, output, pElfSectArr->checksum[i]);
                 if (output != pElfSectArr->checksum[i]) {
                     LOGI("Executable Section Manipulated, maybe due to Frida or other hooking framework Act Now!!!");
                     return true;
@@ -224,12 +228,13 @@ void frida_detect_by_memdiskcompare() {
     LOGI("--------------------frida_detect_by_memdiskcompare start--------------------");
     int fd = 0;
     char map[MAX_LINE];
-    if ((fd = my_openat(AT_FDCWD, PROC_MAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
+    if ((fd = security_openat(AT_FDCWD, PROC_MAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
         while ((read_one_line(fd, map, MAX_LINE)) > 0) {
             for (int i = 0; i < NUM_LIBS; i++) {
                 if (my_strstr(map, libstocheck[i]) != NULL) {
-                    LOGI("detect line: %s", map);
-                    if (true == scan_executable_segments(map, elfSectionArr[i], libstocheck[i])) {
+                    // LOGI("detect line: %s", map);
+                    if (true ==
+                        scan_executable_segments(map, elfSectionArr[i], libstocheck[i])) {
                         detect_result.insert({"frida_detect_by_memdiskcompare", true});
                         break;
                     }
@@ -292,9 +297,29 @@ __attribute__((always_inline))
 void frida_detect_by_agent() {
     int fd = 0;
     char map[MAX_LINE];
-    if ((fd = my_openat(AT_FDCWD, PROC_MAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
+    if ((fd = security_openat(AT_FDCWD, PROC_MAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
         while ((read_one_line(fd, map, MAX_LINE)) > 0) {
-            if (my_strstr(map, "frida-agent") != NULL) {
+            if (my_strstr(map, FRIDA_AGENT) != NULL) {
+                LOGI("detect line: %s", map);
+                detect_result.insert({"frida_detect_by_agent", true});
+            }
+            if (my_strstr(map, TMP_DIR) != NULL) {
+                LOGI("detect line: %s", map);
+                detect_result.insert({"frida_detect_by_agent", true});
+            }
+        }
+    } else {
+        LOGI("Error opening /proc/self/maps. That's usually a bad sign.");
+    }
+    my_close(fd);
+
+    if ((fd = security_openat(AT_FDCWD, PROC_SMAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
+        while ((read_one_line(fd, map, MAX_LINE)) > 0) {
+            if (my_strstr(map, FRIDA_AGENT) != NULL) {
+                LOGI("detect line: %s", map);
+                detect_result.insert({"frida_detect_by_agent", true});
+            }
+            if (my_strstr(map, TMP_DIR) != NULL) {
                 LOGI("detect line: %s", map);
                 detect_result.insert({"frida_detect_by_agent", true});
             }
@@ -332,14 +357,15 @@ void frida_detect_by_memoryscan() {
     unsigned long start, end;
     int fd = 0;
     char map[MAX_LINE];
-    if ((fd = my_openat(AT_FDCWD, PROC_MAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
+    if ((fd = security_openat(AT_FDCWD, PROC_MAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
         while ((read_one_line(fd, map, MAX_LINE)) > 0) {
             sscanf(map, "%lx-%lx %s", &start, &end, permission);
+            // ignore base.apk
             if (my_strstr(map, "base")) {
                 continue;
             }
             if (permission[2] == 'x') {
-                LOGI("line: %s", map);
+                // LOGI("line: %s", map);
                 if (find_mem_string(start, end, (char *) keyword, 5)) {
                     LOGI("check");
                     detect_result.insert({"frida_detect_by_memoryscan", true});
