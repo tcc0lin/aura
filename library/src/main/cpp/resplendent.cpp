@@ -19,12 +19,13 @@ static inline void *detect_frida_loop(void *pargs) {
     timereq.tv_nsec = 0;
     while (1) {
         LOGI("detect_frida_loop");
-        frida_detect_by_threads();
-        frida_detect_by_namedpipe();
-        frida_detect_by_memdiskcompare();
-        frida_detect_by_socket();
-        frida_detect_by_agent();
-        frida_detect_by_memoryscan();
+        // frida_detect_by_threads();
+        // frida_detect_by_namedpipe();
+        // frida_detect_by_memdiskcompare();
+        // frida_detect_by_socket();
+        // frida_detect_by_agent();
+        // frida_detect_by_memoryscan();
+        frida_detect_by_solist();
         my_nanosleep(&timereq, NULL);
         // test
     }

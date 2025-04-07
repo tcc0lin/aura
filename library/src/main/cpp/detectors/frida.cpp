@@ -1,3 +1,4 @@
+#include <link.h>
 #include "detectors.h"
 #include "../utils/logging.h"
 #include "../custom_syscall.h"
@@ -78,7 +79,7 @@ void parse_proc_maps_to_fetch_path(char **filepaths) {
     int fd = 0;
     char map[MAX_LINE];
     int counter = 0;
-    if ((fd = security_openat(AT_FDCWD, PROC_MAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
+    if ((fd = my_openat(AT_FDCWD, PROC_MAPS, O_RDONLY | O_CLOEXEC, 0)) != 0) {
         while ((read_one_line(fd, map, MAX_LINE)) > 0) {
             for (int i = 0; i < NUM_LIBS; i++) {
                 if (my_strstr(map, libstocheck[i]) != NULL) {
@@ -375,6 +376,18 @@ void frida_detect_by_memoryscan() {
         }
         my_close(fd);
     }
+}
+
+static int callback(struct dl_phdr_info *info, size_t size, void *data) {
+    if (my_strstr(info->dlpi_name, FRIDA_AGENT) != NULL) {
+        LOGI("detect line: %s", info->dlpi_name);
+        detect_result.insert({"frida_detect_by_solist", true});
+    }
+    return 0;
+}
+
+void frida_detect_by_solist() {
+    dl_iterate_phdr(callback, NULL);
 }
 
 __attribute__((always_inline))

@@ -80,5 +80,7 @@ void frida_detect_by_agent();
 
 void frida_detect_by_memoryscan();
 
+void frida_detect_by_solist();
+
 // TODO
 // add libart.so detect: https://bbs.kanxue.com/thread-268586-1.htm
