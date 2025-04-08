@@ -30,7 +30,10 @@ suspend fun runDetector(id: Int, packages: Collection<String>?) {
 @Composable
 fun MainPage(modifier: Modifier) {
     LaunchedEffect(appContext) {
-        runDetector(0, null)
+        while (true) {
+            runDetector(0, null)
+            delay(10_000)
+        }
     }
 
     Column(

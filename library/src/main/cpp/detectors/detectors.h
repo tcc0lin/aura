@@ -60,12 +60,12 @@ typedef struct stExecSection {
 //when the size of the libraries are > few MBs
 static execSection *elfSectionArr[NUM_LIBS] = {NULL};
 
-static std::map<char *, bool> detect_result;
+static std::map<char *, int> detect_result;
 
 void prepare_collect_checksum();
 
 // result
-bool get_detect_result(char *key);
+int get_detect_result(char *key);
 
 // real logic
 void frida_detect_by_namedpipe();
@@ -84,3 +84,4 @@ void frida_detect_by_solist();
 
 // TODO
 // add libart.so detect: https://bbs.kanxue.com/thread-268586-1.htm
+//check export func
