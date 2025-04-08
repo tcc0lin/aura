@@ -12,6 +12,7 @@ class FridaDetector(context: Context) : IDetector(context) {
     external fun fridaDetectBySocket(): Boolean
     external fun fridaDetectByAgent(): Boolean
     external fun fridaDetectByMemoryscan(): Boolean
+    external fun fridaDetectBySoList(): Boolean
     override fun run(packages: Collection<String>?, detail: Detail?): Result {
         var result = Result.NOT_FOUND
         val add: (Pair<String, Result>) -> Unit = {
@@ -24,6 +25,7 @@ class FridaDetector(context: Context) : IDetector(context) {
         add("frida detect by socket" to if (fridaDetectBySocket()) Result.FOUND else Result.NOT_FOUND)
         add("frida detect by agent" to if (fridaDetectByAgent()) Result.FOUND else Result.NOT_FOUND)
         add("frida detect by memory scan" to if (fridaDetectByMemoryscan()) Result.FOUND else Result.NOT_FOUND)
+        add("frida detect by solist scan" to if (fridaDetectBySoList()) Result.FOUND else Result.NOT_FOUND)
         return result
     }
 }

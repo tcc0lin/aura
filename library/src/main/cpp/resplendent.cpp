@@ -19,12 +19,12 @@ static inline void *detect_frida_loop(void *pargs) {
     timereq.tv_nsec = 0;
     while (1) {
         LOGI("detect_frida_loop");
-        // frida_detect_by_threads();
-        // frida_detect_by_namedpipe();
-        // frida_detect_by_memdiskcompare();
-        // frida_detect_by_socket();
-        // frida_detect_by_agent();
-        // frida_detect_by_memoryscan();
+         frida_detect_by_threads();
+         frida_detect_by_namedpipe();
+         frida_detect_by_memdiskcompare();
+         frida_detect_by_socket();
+         frida_detect_by_agent();
+         frida_detect_by_memoryscan();
         frida_detect_by_solist();
         my_nanosleep(&timereq, NULL);
         // test
@@ -59,6 +59,7 @@ GENERATE_JNI_FUNC(frida_detect_by_memdiskcompare)
 GENERATE_JNI_FUNC(frida_detect_by_socket)
 GENERATE_JNI_FUNC(frida_detect_by_agent)
 GENERATE_JNI_FUNC(frida_detect_by_memoryscan)
+GENERATE_JNI_FUNC(frida_detect_by_solist)
 
 static JNINativeMethod gMethods[] = {
         {"fridaDetectByNamedpipe",      "()Z", (void *) JNI_frida_detect_by_namedpipe},
@@ -67,6 +68,7 @@ static JNINativeMethod gMethods[] = {
         {"fridaDetectBySocket",         "()Z", (void *) JNI_frida_detect_by_socket},
         {"fridaDetectByAgent",          "()Z", (void *) JNI_frida_detect_by_agent},
         {"fridaDetectByMemoryscan",     "()Z", (void *) JNI_frida_detect_by_memoryscan},
+        {"fridaDetectBySoList",     "()Z", (void *) JNI_frida_detect_by_solist},
 };
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
