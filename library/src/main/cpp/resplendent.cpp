@@ -17,6 +17,7 @@
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #include <pthread.h>
+#include "utils/system_properties1.h"
 
 static inline void *detect_frida_loop(void *pargs) {
     struct timespec timereq;
@@ -94,29 +95,30 @@ void make_socket() {
 //Upon loading the library, this function annotated as constructor starts executing
 __attribute__((constructor))
 void init_for_frida_detect() {
-    pthread_create_t p_pthread_create = (pthread_create_t) dlsym(RTLD_DEFAULT, "pthread_create");
-//    anti ptrace logic
-    make_socket();
-    child_pid = fork();
-    if (child_pid == 0) {
-        child_monitor(getppid());
-        _exit(0);
-    }
-    client_fd = accept(socket_fd, NULL, NULL);
-    pthread_t tid;
-    if (!p_pthread_create) {
-        fprintf(stderr, "dlsym error: %s\n", dlerror());
-    } else {
-        pthread_create(&tid, NULL, heartbeat_thread, NULL);
-    }
-//    frida detect logic
-    prepare_collect_checksum();
-    pthread_t t;
-    if (!p_pthread_create) {
-        fprintf(stderr, "dlsym error: %s\n", dlerror());
-    } else {
-        p_pthread_create(&t, NULL, detect_frida_loop, NULL);
-    }
+//    pthread_create_t p_pthread_create = (pthread_create_t) dlsym(RTLD_DEFAULT, "pthread_create");
+////    anti ptrace logic
+//    make_socket();
+//    child_pid = fork();
+//    if (child_pid == 0) {
+//        child_monitor(getppid());
+//        _exit(0);
+//    }
+//    client_fd = accept(socket_fd, NULL, NULL);
+//    pthread_t tid;
+//    if (!p_pthread_create) {
+//        fprintf(stderr, "dlsym error: %s\n", dlerror());
+//    } else {
+//        pthread_create(&tid, NULL, heartbeat_thread, NULL);
+//    }
+////    frida detect logic
+//    prepare_collect_checksum();
+//    pthread_t t;
+//    if (!p_pthread_create) {
+//        fprintf(stderr, "dlsym error: %s\n", dlerror());
+//    } else {
+//        p_pthread_create(&t, NULL, detect_frida_loop, NULL);
+//    }
+    ssss1();
 }
 
 jintArray get_detect_result_to_java(JNIEnv *env, jobject jobj) {
