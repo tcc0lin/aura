@@ -11,6 +11,8 @@
 #include <arpa/inet.h>
 #include <malloc.h>
 #include <map>
+#include <dlfcn.h>
+#include <sys/system_properties.h>
 
 #ifndef AURA_DETECTORS_H
 #define AURA_DETECTORS_H
@@ -67,7 +69,7 @@ void prepare_collect_checksum();
 // result
 int get_detect_result(char *key);
 
-// real logic
+// frida real logic
 void frida_detect_by_namedpipe();
 
 void frida_detect_by_threads();
@@ -81,7 +83,23 @@ void frida_detect_by_agent();
 void frida_detect_by_memoryscan();
 
 void frida_detect_by_solist();
-
 // TODO
 // add libart.so detect: https://bbs.kanxue.com/thread-268586-1.htm
 //check export func
+
+//property real logic
+typedef struct {
+    char *key;
+    char *value;
+} Property;
+
+struct ReadCallbackContext {
+    char value[PROP_VALUE_MAX];
+    bool found;
+};
+
+char *get_security_property(const char *key);
+
+void free_properties();
+
+void init_properties();

@@ -13,10 +13,12 @@ import com.tcc0lin.aura.MyApplication.Companion.appContext
 import com.tcc0lin.aura.component.CheckCard
 import com.tcc0lin.aura.component.IconHintCard
 import com.tcc0lin.aura.detectors.FridaDetector
+import com.tcc0lin.aura.detectors.SecurityProperty
 import kotlinx.coroutines.*
 
 val snapShotList = mutableStateListOf<Triple<IDetector, IDetector.Result?, Detail?>>(
     Triple(FridaDetector(appContext), null, null),
+    Triple(SecurityProperty(appContext), null, null),
 )
 
 suspend fun runDetector(id: Int, packages: Collection<String>?) {
@@ -32,6 +34,7 @@ fun MainPage(modifier: Modifier) {
     LaunchedEffect(appContext) {
         while (true) {
             runDetector(0, null)
+            runDetector(1, null)
             delay(10_000)
         }
     }
@@ -45,9 +48,7 @@ fun MainPage(modifier: Modifier) {
         IconHintCard()
         snapShotList.forEach {
             CheckCard(
-                title = it.first.name,
-                result = it.second,
-                detail = it.third
+                title = it.first.name, result = it.second, detail = it.third
             )
         }
     }

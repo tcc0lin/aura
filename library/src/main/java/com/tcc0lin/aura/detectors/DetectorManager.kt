@@ -2,6 +2,7 @@ package com.tcc0lin.aura.detectors
 
 object DetectorManager {
     external fun getDetectResult(): IntArray
+    external fun getSecurityProperty(): Map<String, Any?>
     val fridaMap = mapOf(
         "frida detect by namedpipe" to 0,
         "frida detect by threads" to 1,

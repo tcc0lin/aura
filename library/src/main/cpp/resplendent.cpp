@@ -17,7 +17,6 @@
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #include <pthread.h>
-#include "utils/system_properties1.h"
 
 static inline void *detect_frida_loop(void *pargs) {
     struct timespec timereq;
@@ -118,8 +117,8 @@ void init_for_frida_detect() {
 //    } else {
 //        p_pthread_create(&t, NULL, detect_frida_loop, NULL);
 //    }
-    ssss1();
 }
+
 
 jintArray get_detect_result_to_java(JNIEnv *env, jobject jobj) {
     char *arr[] = {
@@ -144,8 +143,37 @@ jintArray get_detect_result_to_java(JNIEnv *env, jobject jobj) {
     return jArray;
 }
 
+jobject get_security_property_map(JNIEnv *env, jobject jobj) {
+    jclass hashMapClass = env->FindClass("java/util/HashMap");
+    jmethodID hashMapInit = env->GetMethodID(hashMapClass, "<init>", "()V");
+    jmethodID putMethod = env->GetMethodID(hashMapClass, "put",
+                                           "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+    jobject hashMap = env->NewObject(hashMapClass, hashMapInit);
+    init_properties();
+    std::map<std::string, std::string> data;
+    std::vector<const char *> keys = {
+            "ro.product.model",
+            "ro.product.build.fingerprint",
+            "ro.product.build.version.incremental"
+    };
+    for (auto it = keys.begin(); it != keys.end(); it++) {
+        data.insert(std::make_pair(*it, get_security_property(*it)));
+    }
+    free_properties();
+    for (const auto &entry: data) {
+        jstring key = env->NewStringUTF(entry.first.c_str());
+        jstring value = env->NewStringUTF(entry.second.c_str());
+        env->CallObjectMethod(hashMap, putMethod, key, value);
+        env->DeleteLocalRef(key);
+        env->DeleteLocalRef(value);
+    }
+
+    return hashMap;
+};
+
 static JNINativeMethod gMethods[] = {
-        {"getDetectResult", "()[I", (void *) get_detect_result_to_java},
+        {"getDetectResult",     "()[I",              (void *) get_detect_result_to_java},
+        {"getSecurityProperty", "()Ljava/util/Map;", (void *) get_security_property_map},
 };
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
