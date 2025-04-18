@@ -52,10 +52,6 @@ import com.tcc0lin.aura.ui.theme.AuraTheme
 class MainActivity : ComponentActivity() {
     private val TAG = "[Aura Detector]"
 
-    companion object {
-        var mRemoteService: IRemoteService? = null
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -71,28 +67,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        initServiceClient()
-    }
-
-    fun initServiceClient() {
-        Log.i(TAG, "MainActivity: " + android.os.Process.myPid() + " onServiceInit");
-        var connection = object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                Log.i(TAG, "MainActivity onServiceConnected")
-                try {
-                    mRemoteService = IRemoteService.Stub.asInterface(service)
-                } catch (e: RemoteException) {
-                    Log.i(TAG, "RemoteException: ${e.message}")
-                } catch (e: Exception) {
-                    Log.i(TAG, "General Exception: ${e.message}")
-                }
-            }
-
-            override fun onServiceDisconnected(name: ComponentName?) {
-                Log.i(TAG, "MainActivity onServiceDisconnected")
-            }
-        }
-        bindService(Intent(this, RemoteService::class.java), connection, Context.BIND_AUTO_CREATE)
     }
 }
 

@@ -7,7 +7,7 @@ import android.util.Log
 
 class RemoteService : Service() {
     companion object {
-        val TAG: String = "[Aura Detector]"
+        const val TAG: String = "[Aura Detector]"
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -16,9 +16,8 @@ class RemoteService : Service() {
     }
 
     class ServiceStub : IRemoteService.Stub() {
-        override fun add(a: Int, b: Int): Int {
-            Log.i(RemoteService.TAG, "RemoteService add");
-            return 3;
+        override fun getsu(): Int {
+            return 31221231;
         }
     }
 }

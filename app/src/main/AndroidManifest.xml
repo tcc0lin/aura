@@ -27,7 +27,8 @@
 
         <service
             android:name=".RemoteService"
-            android:isolatedProcess="true" />
+            android:isolatedProcess="true"
+        />
     </application>
 
 </manifest>
