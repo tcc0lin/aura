@@ -12,13 +12,17 @@ import androidx.compose.ui.Modifier
 import com.tcc0lin.aura.MyApplication.Companion.appContext
 import com.tcc0lin.aura.component.CheckCard
 import com.tcc0lin.aura.component.IconHintCard
+import com.tcc0lin.aura.detectors.AppInfo
 import com.tcc0lin.aura.detectors.FridaDetector
-import com.tcc0lin.aura.detectors.SecurityProperty
+import com.tcc0lin.aura.detectors.MagiskDetector
+import com.tcc0lin.aura.detectors.SecurityDeviceInfo
 import kotlinx.coroutines.*
 
 val snapShotList = mutableStateListOf<Triple<IDetector, IDetector.Result?, Detail?>>(
+    Triple(MagiskDetector(appContext), null, null),
     Triple(FridaDetector(appContext), null, null),
-    Triple(SecurityProperty(appContext), null, null),
+    Triple(SecurityDeviceInfo(appContext), null, null),
+    Triple(AppInfo(appContext), null, null),
 )
 
 suspend fun runDetector(id: Int, packages: Collection<String>?) {
@@ -35,6 +39,8 @@ fun MainPage(modifier: Modifier) {
         while (true) {
             runDetector(0, null)
             runDetector(1, null)
+            runDetector(2, null)
+            runDetector(3, null)
             delay(10_000)
         }
     }

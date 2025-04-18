@@ -1,8 +1,15 @@
 package com.tcc0lin.aura
 
+import android.annotation.SuppressLint
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.net.Uri
 import android.os.Bundle
+import android.os.IBinder
+import android.os.RemoteException
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,6 +50,12 @@ import androidx.core.content.ContextCompat.startActivity
 import com.tcc0lin.aura.ui.theme.AuraTheme
 
 class MainActivity : ComponentActivity() {
+    private val TAG = "[Aura Detector]"
+
+    companion object {
+        var mRemoteService: IRemoteService? = null
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -58,6 +71,28 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        initServiceClient()
+    }
+
+    fun initServiceClient() {
+        Log.i(TAG, "MainActivity: " + android.os.Process.myPid() + " onServiceInit");
+        var connection = object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                Log.i(TAG, "MainActivity onServiceConnected")
+                try {
+                    mRemoteService = IRemoteService.Stub.asInterface(service)
+                } catch (e: RemoteException) {
+                    Log.i(TAG, "RemoteException: ${e.message}")
+                } catch (e: Exception) {
+                    Log.i(TAG, "General Exception: ${e.message}")
+                }
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                Log.i(TAG, "MainActivity onServiceDisconnected")
+            }
+        }
+        bindService(Intent(this, RemoteService::class.java), connection, Context.BIND_AUTO_CREATE)
     }
 }
 
@@ -71,7 +106,8 @@ private fun MainTopBar() {
 private fun MainFab(onClick: () -> Unit) {
     ExtendedFloatingActionButton(
         icon = { Icon(Icons.Outlined.EmojiObjects, "About") },
-        text = { Text("About") }, onClick = onClick
+        text = { Text("About") },
+        onClick = onClick
     )
 }
 
