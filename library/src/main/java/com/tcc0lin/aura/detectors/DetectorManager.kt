@@ -12,4 +12,7 @@ object DetectorManager {
         "frida detect by memory scan" to 5,
         "frida detect by solist scan" to 6,
     )
+    val magiskMap = mapOf(
+        "magisk detect by exec path" to 7
+    )
 }

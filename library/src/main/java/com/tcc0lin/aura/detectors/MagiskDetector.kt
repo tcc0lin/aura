@@ -26,14 +26,15 @@ class MagiskDetector(context: Context) : IDetector(context) {
             detail?.add(it)
         }
         try {
-            val sss = mRemoteService?.getsu();
-            Log.i(TAG, "RemoteService call getsu $sss");
+            val resultArray = mRemoteService?.getDetectResult();
+            for ((key, value) in DetectorManager.magiskMap) {
+                add(key to Result.fromCode(resultArray!![value]))
+            }
         } catch (e: RemoteException) {
             Log.i(TAG, "RemoteException: ${e.message}")
         } catch (e: Exception) {
             Log.i(TAG, "General Exception: ${e.message}")
         }
-        add("result" to Result.NOT_FOUND)
         return result
     }
 

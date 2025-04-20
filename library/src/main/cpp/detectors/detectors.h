@@ -66,8 +66,16 @@ static std::map<char *, int> detect_result;
 
 void prepare_collect_checksum();
 
+extern int g_detectionResults[];
+extern const size_t g_detectionSize;
+
+void set_detection_value(size_t index, int value);
+
 // result
 int get_detect_result(char *key);
+
+// magisk real logic
+void magisk_detect_by_exec_path();
 
 // frida real logic
 void frida_detect_by_namedpipe();

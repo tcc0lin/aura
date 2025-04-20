@@ -117,24 +117,12 @@ void init_for_frida_detect() {
 //    } else {
 //        p_pthread_create(&t, NULL, detect_frida_loop, NULL);
 //    }
+    magisk_detect_by_exec_path();
 }
 
 
 jintArray get_detect_result_to_java(JNIEnv *env, jobject jobj) {
-    char *arr[] = {
-            "frida_detect_by_namedpipe",
-            "frida_detect_by_threads",
-            "frida_detect_by_memdiskcompare",
-            "frida_detect_by_socket",
-            "frida_detect_by_agent",
-            "frida_detect_by_memoryscan",
-            "frida_detect_by_solist"
-    };
-    const size_t arr_size = sizeof(arr) / sizeof(arr[0]);
-    std::vector<jint> results;
-    for (size_t i = 0; i < arr_size; ++i) {
-        results.push_back(get_detect_result(arr[i]));
-    }
+    std::vector<jint> results(g_detectionResults, g_detectionResults + g_detectionSize);
     jintArray jArray = env->NewIntArray(results.size());
     if (jArray) {
         env->SetIntArrayRegion(jArray, 0, results.size(), results.data());
@@ -167,7 +155,6 @@ jobject get_security_property_map(JNIEnv *env, jobject jobj) {
         env->DeleteLocalRef(key);
         env->DeleteLocalRef(value);
     }
-
     return hashMap;
 };
 

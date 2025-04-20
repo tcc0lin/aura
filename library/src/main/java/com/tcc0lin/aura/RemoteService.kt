@@ -4,10 +4,15 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import com.tcc0lin.aura.detectors.DetectorManager
 
 class RemoteService : Service() {
     companion object {
         const val TAG: String = "[Aura Detector]"
+
+        init {
+            System.loadLibrary("resplendent")
+        }
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -16,8 +21,8 @@ class RemoteService : Service() {
     }
 
     class ServiceStub : IRemoteService.Stub() {
-        override fun getsu(): Int {
-            return 31221231;
+        override fun getDetectResult(): IntArray {
+            return DetectorManager.getDetectResult()
         }
     }
 }
