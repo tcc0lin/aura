@@ -118,6 +118,7 @@ void init_for_frida_detect() {
 //        p_pthread_create(&t, NULL, detect_frida_loop, NULL);
 //    }
     magisk_detect_by_exec_path();
+    magisk_detect_by_mountinfo();
 }
 
 

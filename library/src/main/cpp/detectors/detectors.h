@@ -13,6 +13,7 @@
 #include <map>
 #include <dlfcn.h>
 #include <sys/system_properties.h>
+#include <sys/sysmacros.h>
 
 #ifndef AURA_DETECTORS_H
 #define AURA_DETECTORS_H
@@ -76,6 +77,8 @@ int get_detect_result(char *key);
 
 // magisk real logic
 void magisk_detect_by_exec_path();
+
+void magisk_detect_by_mountinfo();
 
 // frida real logic
 void frida_detect_by_namedpipe();

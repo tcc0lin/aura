@@ -8,6 +8,6 @@ import androidx.annotation.RequiresApi
 @RequiresApi(Build.VERSION_CODES.Q)
 class AppZygote : ZygotePreload {
     override fun doPreload(p0: ApplicationInfo) {
-        TODO("Not yet implemented")
+        System.loadLibrary("resplendent");
     }
 }

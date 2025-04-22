@@ -13,12 +13,16 @@ import com.tcc0lin.aura.MyApplication.Companion.appContext
 import com.tcc0lin.aura.component.CheckCard
 import com.tcc0lin.aura.component.IconHintCard
 import com.tcc0lin.aura.detectors.AppInfo
+import com.tcc0lin.aura.detectors.CloudPhoneDetector
+import com.tcc0lin.aura.detectors.EmulatorDetector
 import com.tcc0lin.aura.detectors.FridaDetector
 import com.tcc0lin.aura.detectors.MagiskDetector
 import com.tcc0lin.aura.detectors.SecurityDeviceInfo
 import kotlinx.coroutines.*
 
 val snapShotList = mutableStateListOf<Triple<IDetector, IDetector.Result?, Detail?>>(
+    Triple(CloudPhoneDetector(appContext), null, null),
+    Triple(EmulatorDetector(appContext), null, null),
     Triple(MagiskDetector(appContext), null, null),
     Triple(FridaDetector(appContext), null, null),
     Triple(SecurityDeviceInfo(appContext), null, null),
@@ -41,6 +45,8 @@ fun MainPage(modifier: Modifier) {
             runDetector(1, null)
             runDetector(2, null)
             runDetector(3, null)
+            runDetector(4, null)
+            runDetector(5, null)
             delay(10_000)
         }
     }

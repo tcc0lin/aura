@@ -13,6 +13,7 @@ object DetectorManager {
         "frida detect by solist scan" to 6,
     )
     val magiskMap = mapOf(
-        "magisk detect by exec path" to 7
+        "magisk detect by exec path" to 7,
+        "magisk detect by mount" to 8
     )
 }
